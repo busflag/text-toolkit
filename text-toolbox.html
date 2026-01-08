@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本工具包 - 在线文本处理工具</title>
+    <style>
+        /* CSS变量定义主题色 */
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 顶部标题栏 */
+        .header {
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .title {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        /* 左侧导航 */
+        .sidebar {
+            width: 250px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        /* 右侧内容区 */
+        .content {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
+            display: block;
+        }
+
+        .tool-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        /* 通用输入框样式 */
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* 通用按钮样式 */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #475569;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        /* 统计信息卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* 输出区域 */
+        .output-section {
+            margin-top: 1.5rem;
+        }
+
+        .output-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .output-box {
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 150px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* 对比模块样式 */
+        .compare-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .compare-box {
+            position: relative;
+        }
+
+        .compare-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .diff-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .diff-added {
+            background-color: #d1fae5;
+        }
+
+        .diff-removed {
+            background-color: #fee2e2;
+        }
+
+        /* 提示消息 */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--success-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error {
+            background: var(--error-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 0 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                padding: 1rem;
+            }
+
+            .nav-list {
+                display: flex;
+                overflow-x: auto;
+                gap: 0.5rem;
+                padding-bottom: 0.5rem;
+            }
+
+            .nav-item {
+                white-space: nowrap;
+                margin-bottom: 0;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .compare-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部标题栏 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">📝</div>
+            <div class="title">文本工具包</div>
+        </div>
+    </header>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 左侧导航 -->
+        <aside class="sidebar">
+            <nav class="nav-list">
+                <div class="nav-item active" data-tool="word-count">字数统计</div>
+                <div class="nav-item" data-tool="case-convert">大小写转换</div>
+                <div class="nav-item" data-tool="text-dedupe">文本去重</div>
+                <div class="nav-item" data-tool="text-compare">文本对比</div>
+                <div class="nav-item" data-tool="json-format">JSON格式化</div>
+            </nav>
+        </aside>
+
+        <!-- 右侧内容区 -->
+        <main class="content">
+            <!-- 1. 字数统计模块 -->
+            <section class="tool-section active" id="word-count">
+                <h2 class="tool-title">字数统计</h2>
+                <textarea id="wordCountInput" placeholder="在此输入或粘贴文本，统计信息将实时更新..."></textarea>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="charWithSpace">0</div>
+                        <div class="stat-label">字符数（含空格）</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="charWithoutSpace">0</div>
+                        <div class="stat-label">字符数（不含空格）</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="chineseChar">0</div>
+                        <div class="stat-label">中文字符数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="englishWord">0</div>
+                        <div class="stat-label">英文单词数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lineCount">0</div>
+                        <div class="stat-label">行数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="paragraphCount">0</div>
+                        <div class="stat-label">段落数</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 大小写转换模块 -->
+            <section class="tool-section" id="case-convert">
+                <h2 class="tool-title">大小写转换</h2>
+                <textarea id="caseInput" placeholder="在此输入需要转换的文本..."></textarea>
+                <div class="btn-group">
+                    <button class="btn" onclick="convertCase('uppercase')">全部大写</button>
+                    <button class="btn" onclick="convertCase('lowercase')">全部小写</button>
+                    <button class="btn" onclick="convertCase('capitalize')">首字母大写</button>
+                    <button class="btn" onclick="convertCase('toggle')">大小写互换</button>
+                </div>
+                <div class="output-section">
+                    <div class="output-label">转换结果：</div>
+                    <div class="output-box" id="caseOutput"></div>
+                    <div class="btn-group" style="margin-top: 1rem;">
+                        <button class="btn btn-success" onclick="copyToClipboard('caseOutput')">一键复制</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. 文本去重模块 -->
+            <section class="tool-section" id="text-dedupe">
+                <h2 class="tool-title">文本去重</h2>
+                <textarea id="dedupeInput" placeholder="每行一个条目，输入需要去重的文本..."></textarea>
+                <div class="btn-group">
+                    <button class="btn" onclick="dedupeText()">处理去重</button>
+                </div>
+                <div class="output-section">
+                    <div class="output-label">去重结果：</div>
+                    <div class="output-box" id="dedupeOutput"></div>
+                    <div class="stats-grid" style="margin-top: 1rem;">
+                        <div class="stat-card">
+                            <div class="stat-value" id="originalLines">0</div>
+                            <div class="stat-label">原始行数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="dedupeLines">0</div>
+                            <div class="stat-label">去重后行数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="duplicateLines">0</div>
+                            <div class="stat-label">重复行数</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. 文本对比模块 -->
+            <section class="tool-section" id="text-compare">
+                <h2 class="tool-title">文本对比</h2>
+                <div class="compare-container">
+                    <div class="compare-box">
+                        <div class="compare-label">文本A：</div>
+                        <textarea id="compareInputA" placeholder="输入第一段文本..."></textarea>
+                    </div>
+                    <div class="compare-box">
+                        <div class="compare-label">文本B：</div>
+                        <textarea id="compareInputB" placeholder="输入第二段文本..."></textarea>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="compareText()">开始对比</button>
+                </div>
+                <div class="output-section">
+                    <div class="output-label">对比结果：</div>
+                    <div class="compare-container">
+                        <div class="compare-box">
+                            <div class="compare-label">文本A差异：</div>
+                            <div class="output-box" id="compareOutputA"></div>
+                        </div>
+                        <div class="compare-box">
+                            <div class="compare-label">文本B差异：</div>
+                            <div class="output-box" id="compareOutputB"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. JSON格式化模块 -->
+            <section class="tool-section" id="json-format">
+                <h2 class="tool-title">JSON格式化</h2>
+                <textarea id="jsonInput" placeholder="在此输入JSON文本..."></textarea>
+                <div class="btn-group">
+                    <button class="btn" onclick="formatJSON()">格式化</button>
+                    <button class="btn btn-secondary" onclick="compressJSON()">压缩</button>
+                </div>
+                <div class="output-section">
+                    <div class="output-label">处理结果：</div>
+                    <div class="output-box" id="jsonOutput"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ==================== 导航切换功能 ====================
+        const navItems = document.querySelectorAll('.nav-item');
+        const toolSections = document.querySelectorAll('.tool-section');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 移除所有活动状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                toolSections.forEach(section => section.classList.remove('active'));
+
+                // 添加当前活动状态
+                item.classList.add('active');
+                const toolId = item.getAttribute('data-tool');
+                document.getElementById(toolId).classList.add('active');
+            });
+        });
+
+        // ==================== 提示消息功能 ====================
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${isError ? 'error' : ''}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // ==================== 复制到剪贴板功能 ====================
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent || element.innerText;
+
+            if (!text.trim()) {
+                showToast('没有可复制的内容', true);
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('复制成功！');
+            }).catch(() => {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('复制成功！');
+                } catch (err) {
+                    showToast('复制失败', true);
+                }
+                document.body.removeChild(textarea);
+            });
+        }
+
+        // ==================== 1. 字数统计模块 ====================
+        const wordCountInput = document.getElementById('wordCountInput');
+
+        function updateWordCount() {
+            const text = wordCountInput.value;
+
+            // 字符数（含空格）
+            const charWithSpace = text.length;
+            document.getElementById('charWithSpace').textContent = charWithSpace;
+
+            // 字符数（不含空格）
+            const charWithoutSpace = text.replace(/\s/g, '').length;
+            document.getElementById('charWithoutSpace').textContent = charWithoutSpace;
+
+            // 中文字符数（包括中文标点）
+            const chineseChar = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+            document.getElementById('chineseChar').textContent = chineseChar;
+
+            // 英文单词数
+            const englishWords = text.match(/[a-zA-Z]+/g) || [];
+            document.getElementById('englishWord').textContent = englishWords.length;
+
+            // 行数
+            const lineCount = text.split('\n').length;
+            document.getElementById('lineCount').textContent = lineCount;
+
+            // 段落数（空行分隔）
+            const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+            document.getElementById('paragraphCount').textContent = paragraphs.length;
+        }
+
+        // 实时监听输入
+        wordCountInput.addEventListener('input', updateWordCount);
+        // 初始化统计
+        updateWordCount();
+
+        // ==================== 2. 大小写转换模块 ====================
+        function convertCase(type) {
+            const input = document.getElementById('caseInput').value;
+            const output = document.getElementById('caseOutput');
+            let result = '';
+
+            if (!input.trim()) {
+                output.textContent = '';
+                showToast('请先输入文本', true);
+                return;
+            }
+
+            switch (type) {
+                case 'uppercase':
+                    result = input.toUpperCase();
+                    break;
+                case 'lowercase':
+                    result = input.toLowerCase();
+                    break;
+                case 'capitalize':
+                    // 首字母大写（每个单词）
+                    result = input.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+                    break;
+                case 'toggle':
+                    // 大小写互换
+                    result = input.split('').map(char => {
+                        if (char === char.toUpperCase()) {
+                            return char.toLowerCase();
+                        } else {
+                            return char.toUpperCase();
+                        }
+                    }).join('');
+                    break;
+            }
+
+            output.textContent = result;
+        }
+
+        // ==================== 3. 文本去重模块 ====================
+        function dedupeText() {
+            const input = document.getElementById('dedupeInput').value;
+            const output = document.getElementById('dedupeOutput');
+
+            if (!input.trim()) {
+                output.textContent = '';
+                showToast('请先输入文本', true);
+                return;
+            }
+
+            // 按行分割
+            const lines = input.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            const originalCount = lines.length;
+
+            // 去重（保持顺序）
+            const seen = new Set();
+            const uniqueLines = [];
+            lines.forEach(line => {
+                if (!seen.has(line)) {
+                    seen.add(line);
+                    uniqueLines.push(line);
+                }
+            });
+
+            const dedupeCount = uniqueLines.length;
+            const duplicateCount = originalCount - dedupeCount;
+
+            // 更新统计
+            document.getElementById('originalLines').textContent = originalCount;
+            document.getElementById('dedupeLines').textContent = dedupeCount;
+            document.getElementById('duplicateLines').textContent = duplicateCount;
+
+            // 显示结果
+            output.textContent = uniqueLines.join('\n');
+        }
+
+        // ==================== 4. 文本对比模块 ====================
+        function compareText() {
+            const textA = document.getElementById('compareInputA').value;
+            const textB = document.getElementById('compareInputB').value;
+            const outputA = document.getElementById('compareOutputA');
+            const outputB = document.getElementById('compareOutputB');
+
+            if (!textA.trim() && !textB.trim()) {
+                showToast('请至少输入一段文本', true);
+                return;
+            }
+
+            // 简单的逐字符对比
+            const linesA = textA.split('\n');
+            const linesB = textB.split('\n');
+            const maxLines = Math.max(linesA.length, linesB.length);
+
+            let htmlA = '';
+            let htmlB = '';
+
+            for (let i = 0; i < maxLines; i++) {
+                const lineA = linesA[i] || '';
+                const lineB = linesB[i] || '';
+
+                if (lineA !== lineB) {
+                    // 找出差异字符
+                    const diffA = highlightDiff(lineA, lineB);
+                    const diffB = highlightDiff(lineB, lineA);
+                    htmlA += `<div class="diff-removed">${diffA}</div>`;
+                    htmlB += `<div class="diff-added">${diffB}</div>`;
+                } else {
+                    htmlA += `<div>${escapeHtml(lineA)}</div>`;
+                    htmlB += `<div>${escapeHtml(lineB)}</div>`;
+                }
+            }
+
+            outputA.innerHTML = htmlA || '<div style="color: var(--text-secondary);">无差异</div>';
+            outputB.innerHTML = htmlB || '<div style="color: var(--text-secondary);">无差异</div>';
+        }
+
+        // 高亮差异字符
+        function highlightDiff(str1, str2) {
+            let result = '';
+            const maxLen = Math.max(str1.length, str2.length);
+
+            for (let i = 0; i < maxLen; i++) {
+                const char1 = str1[i] || '';
+                const char2 = str2[i] || '';
+
+                if (char1 !== char2) {
+                    result += `<span class="diff-highlight">${escapeHtml(char1)}</span>`;
+                } else {
+                    result += escapeHtml(char1);
+                }
+            }
+
+            return result;
+        }
+
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ==================== 5. JSON格式化模块 ====================
+        function formatJSON() {
+            const input = document.getElementById('jsonInput').value;
+            const output = document.getElementById('jsonOutput');
+
+            if (!input.trim()) {
+                output.textContent = '';
+                showToast('请先输入JSON文本', true);
+                return;
+            }
+
+            try {
+                const obj = JSON.parse(input);
+                const formatted = JSON.stringify(obj, null, 2);
+                output.textContent = formatted;
+                output.style.color = 'var(--text-primary)';
+            } catch (error) {
+                output.textContent = `JSON格式错误：${error.message}`;
+                output.style.color = 'var(--error-color)';
+                showToast('JSON格式错误', true);
+            }
+        }
+
+        function compressJSON() {
+            const input = document.getElementById('jsonInput').value;
+            const output = document.getElementById('jsonOutput');
+
+            if (!input.trim()) {
+                output.textContent = '';
+                showToast('请先输入JSON文本', true);
+                return;
+            }
+
+            try {
+                const obj = JSON.parse(input);
+                const compressed = JSON.stringify(obj);
+                output.textContent = compressed;
+                output.style.color = 'var(--text-primary)';
+            } catch (error) {
+                output.textContent = `JSON格式错误：${error.message}`;
+                output.style.color = 'var(--error-color)';
+                showToast('JSON格式错误', true);
+            }
+        }
+    </script>
+</body>
+</html>
